@@ -1,0 +1,18 @@
+.idea
+__pycache__
+
+build
+tmp
+tmp_optimized
+
+# Added on the build stage uniquely for each platform
+*.pyd
+*.so
+
+# Generated sources
+*.c
+
+# Testing in root folder. Will be removed later
+/*.xlsx
+impeller/*.dll
+testing.py
