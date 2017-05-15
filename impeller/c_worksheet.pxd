@@ -34,6 +34,55 @@ cdef extern from "xlsxwriter.h":
         LXW_SHOW_PRINT_GRIDLINES,
         # Show screen and print gridlines.
         LXW_SHOW_ALL_GRIDLINES
+        
+    ctypedef struct lxw_protection:
+        # Turn off selection of locked cells. This in on in Excel by default.
+        uint8_t no_select_locked_cells;
+    
+        # Turn off selection of unlocked cells. This in on in Excel by default.
+        uint8_t no_select_unlocked_cells;
+    
+        # Prevent formatting of cells.
+        uint8_t format_cells;
+    
+        # Prevent formatting of columns.
+        uint8_t format_columns;
+    
+        # Prevent formatting of rows.
+        uint8_t format_rows;
+    
+        # Prevent insertion of columns.
+        uint8_t insert_columns;
+    
+        # Prevent insertion of rows.
+        uint8_t insert_rows;
+    
+        # Prevent insertion of hyperlinks.
+        uint8_t insert_hyperlinks;
+    
+        # Prevent deletion of columns.
+        uint8_t delete_columns;
+    
+        # Prevent deletion of rows.
+        uint8_t delete_rows;
+    
+        # Prevent sorting data.
+        uint8_t sort;
+    
+        # Prevent filtering data.
+        uint8_t autofilter;
+    
+        # Prevent insertion of pivot tables.
+        uint8_t pivot_tables;
+    
+        # Protect scenarios.
+        uint8_t scenarios;
+    
+        # Protect drawing objects.
+        uint8_t objects;
+    
+        uint8_t no_sheet;
+        uint8_t content;
 
     lxw_error worksheet_write_number(lxw_worksheet *worksheet, lxw_row_t row, lxw_col_t col,
                                      double number, lxw_format *format);
@@ -57,6 +106,8 @@ cdef extern from "xlsxwriter.h":
     void worksheet_hide_zero(lxw_worksheet *worksheet);
     void worksheet_print_across(lxw_worksheet *worksheet);
     void worksheet_print_row_col_headers(lxw_worksheet *worksheet);
+
+    void worksheet_protect(lxw_worksheet *worksheet, const char *password, lxw_protection *options);
 
     lxw_error worksheet_print_area(lxw_worksheet *worksheet, lxw_row_t first_row, lxw_col_t first_col,
                                    lxw_row_t last_row, lxw_col_t last_col);
@@ -96,6 +147,9 @@ cdef class WorkSheet:
     cpdef void print_across(self);
     cpdef void print_area(self, int first_row, int first_col, int last_row, int last_col);
     cpdef void print_row_col_headers(self);
+
+    cdef void _check_protection_options(self, dict opts);
+    cpdef void protect(self, password=*, dict options=*);
 
     cpdef void insert_chart(self, int row, int col, Chart chart, dict options=*);
     cpdef void insert_image(self, int row, int col, filename, dict options=*);

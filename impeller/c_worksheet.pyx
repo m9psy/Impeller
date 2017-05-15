@@ -76,6 +76,38 @@ cdef class WorkSheet:
     cpdef void print_row_col_headers(self):
         worksheet_print_row_col_headers(self.this_ptr)
 
+    cdef void _check_protection_options(self, dict opts):
+        supported_protection_options = {'sheet', 'content', 'options', 'scenarios', 'format_cells', 'format_columns',
+                                        'format_rows', 'insert_columns', 'insert_rows', 'insert_hyperlinks',
+                                        'delete_columns', 'delete_rows', 'select_locked_cells', 'sort', 'autofilter',
+                                        'pivot_tables', 'select_unlocked_cells'}
+        for key in opts.keys():
+            if key not in supported_protection_options:
+                raise ImpellerInvalidParameterError("Invalid protection option %s is not supported" % key)
+
+    cpdef void protect(self, password='', dict options={}):
+        cdef lxw_protection protection
+        self._check_protection_options(options)
+        protection.no_sheet = not options.get('sheet', True)
+        protection.content = options.get('content', False)
+        protection.objects = options.get('options', False)
+        protection.scenarios = options.get('scenarios', False)
+        protection.format_cells = options.get('format_cells', False)
+        protection.format_columns = options.get('format_columns', False)
+        protection.format_rows = options.get('format_rows', False)
+        protection.insert_columns = options.get('insert_columns', False)
+        protection.insert_rows = options.get('insert_rows', False)
+        protection.insert_hyperlinks = options.get('insert_hyperlinks', False)
+        protection.delete_columns = options.get('delete_columns', False)
+        protection.delete_rows = options.get('delete_rows', False)
+        protection.no_select_locked_cells = not options.get('select_locked_cells', True)
+        protection.sort = options.get('sort', False)
+        protection.autofilter = options.get('autofilter', False)
+        protection.pivot_tables = options.get('pivot_tables', False)
+        protection.no_select_unlocked_cells = not options.get('select_unlocked_cells', True)
+
+        worksheet_protect(self.this_ptr, pystring_to_c(password), &protection)
+
 
     cpdef void insert_chart(self, int row, int col, Chart chart, dict options={}):
         cdef lxw_image_options opts
