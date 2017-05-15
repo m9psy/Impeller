@@ -70,6 +70,11 @@ cdef extern from "xlsxwriter.h":
     ctypedef struct lxw_chart:
         pass
 
+    ctypedef struct lxw_chart_series:
+        pass
+
+    lxw_chart_series *chart_add_series(lxw_chart *chart, const char *categories, const char *values);
+
 # TODO: Simulate subclasses with factory?
 # Factory return proper type by chart type from lxw_chart_type
 cdef class Chart:
@@ -79,3 +84,6 @@ cdef class Chart:
     cdef void _set_ptr(self, lxw_chart* ptr);
 
     cdef void _add_chart(self, WorkBook wb, uint8_t chart_type);
+
+    # Return series object?
+    cpdef void add_series(self, dict options=*);

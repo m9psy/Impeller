@@ -94,6 +94,7 @@ cdef int pystring_to_color(color_string);
 cdef int py_underline_to_c(int underline);
 cdef int py_align_to_c(alignment);
 cdef int py_chart_options_to_c(chart_type, chart_subtype);
+cdef int py_gridlines_to_c(int gridlines_type);
 
 cdef bytes pystring_to_c(s);
 cdef unicode _ustring(s);

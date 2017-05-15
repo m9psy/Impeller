@@ -12,6 +12,7 @@ from impeller.c_common cimport lxw_error, lxw_datetime
 from impeller.c_format cimport *
 from impeller.exceptions import *
 from impeller.c_chart cimport *
+from impeller.c_worksheet cimport *
 
 cdef lxw_datetime* convert_datetime(dtm value):
     """
@@ -232,3 +233,17 @@ cdef int py_chart_options_to_c(chart_type, chart_subtype):
     if chart_type_full in available_chart_types:
         return available_chart_types[chart_type_full]
     raise ImpellerInvalidParameterError("Invalid chart type %s with subtype %s" % chart_type, chart_subtype)
+
+
+available_gridlines = {
+    2: LXW_HIDE_ALL_GRIDLINES,
+    1: LXW_SHOW_SCREEN_GRIDLINES,
+    # TODO: Not used in Python ver?
+    3: LXW_SHOW_PRINT_GRIDLINES,
+    0: LXW_SHOW_ALL_GRIDLINES
+}
+
+cdef int py_gridlines_to_c(int gridlines_type):
+    if gridlines_type in available_gridlines:
+        return available_gridlines[gridlines_type]
+    raise ImpellerInvalidParameterError("Invalid grinlines param %d" % gridlines_type)
