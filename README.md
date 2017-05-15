@@ -7,3 +7,5 @@ It is also a thin Cython wrapper around modified [fork](https://github.com/m9psy
 TODO: Link to benchmark.py, benchmark.c, comparing Cython, C and modified C versions
 The only difference is speed:
 TODO: Benchmarks here
+
+Current status: not usable at all, work in progress.
