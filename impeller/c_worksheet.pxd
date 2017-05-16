@@ -84,10 +84,25 @@ cdef extern from "xlsxwriter.h":
         uint8_t no_sheet;
         uint8_t content;
 
-    lxw_error worksheet_write_number(lxw_worksheet *worksheet, lxw_row_t row, lxw_col_t col,
-                                     double number, lxw_format *format);
-    lxw_error worksheet_write_string(lxw_worksheet *worksheet, lxw_row_t row, lxw_col_t col,
-                                     const char *string, lxw_format *format);
+    # TODO: Only hidden supported
+    ctypedef struct lxw_row_col_options:
+    # Hide the row/column
+        uint8_t hidden;
+        uint8_t level;
+        uint8_t collapsed;
+
+    ctypedef struct lxw_header_footer_options:
+        # Header or footer margin in inches. Excel default is 0.3.
+        double margin;
+
+    enum pane_types:
+        NO_PANES = 0,
+        FREEZE_PANES,
+        SPLIT_PANES,
+        FREEZE_SPLIT_PANES
+
+    # TODO: Double identifier. Already another one in c_format.pxd
+    ctypedef int32_t lxw_color_t;
 
     void worksheet_activate(lxw_worksheet *worksheet);
     lxw_error worksheet_autofilter(lxw_worksheet *worksheet, lxw_row_t first_row, lxw_col_t first_col,
@@ -106,8 +121,35 @@ cdef extern from "xlsxwriter.h":
     void worksheet_hide_zero(lxw_worksheet *worksheet);
     void worksheet_print_across(lxw_worksheet *worksheet);
     void worksheet_print_row_col_headers(lxw_worksheet *worksheet);
+    void worksheet_right_to_left(lxw_worksheet *worksheet);
+    void worksheet_select(lxw_worksheet *worksheet);
+    void worksheet_set_default_row(lxw_worksheet *worksheet, double height, uint8_t hide_unused_rows);
+    void worksheet_set_first_sheet(lxw_worksheet *worksheet);
+    void worksheet_set_landscape(lxw_worksheet *worksheet);
+    void worksheet_set_portrait(lxw_worksheet *worksheet);
+    void worksheet_set_page_view(lxw_worksheet *worksheet);
+    void worksheet_set_paper(lxw_worksheet *worksheet, uint8_t paper_type);
+    void worksheet_set_print_scale(lxw_worksheet *worksheet, uint16_t scale);
+    void worksheet_set_start_page(lxw_worksheet *worksheet, uint16_t start_page);
+    lxw_error worksheet_set_h_pagebreaks(lxw_worksheet *worksheet, lxw_row_t breaks[]);
+    lxw_error worksheet_set_v_pagebreaks(lxw_worksheet *worksheet, lxw_col_t breaks[]);
+
+    void worksheet_set_margins(lxw_worksheet *worksheet, double left, double right, double top, double bottom);
+
+    lxw_error worksheet_set_footer_opt(lxw_worksheet *worksheet, const char *string,
+                                       lxw_header_footer_options *options);
+    lxw_error worksheet_set_header_opt(lxw_worksheet *worksheet, const char *string,
+                                       lxw_header_footer_options *options);
 
     void worksheet_protect(lxw_worksheet *worksheet, const char *password, lxw_protection *options);
+
+    lxw_error worksheet_set_column_opt(lxw_worksheet *worksheet, lxw_col_t first_col, lxw_col_t last_col,
+                                       double width, lxw_format *format, lxw_row_col_options *options);
+    lxw_error worksheet_set_row_opt(lxw_worksheet *worksheet, lxw_row_t row, double height,
+                                    lxw_format *format, lxw_row_col_options *options);
+
+    lxw_error worksheet_repeat_columns(lxw_worksheet *worksheet, lxw_col_t first_col, lxw_col_t last_col);
+    lxw_error worksheet_repeat_rows(lxw_worksheet *worksheet, lxw_row_t first_row, lxw_row_t last_row);
 
     lxw_error worksheet_print_area(lxw_worksheet *worksheet, lxw_row_t first_row, lxw_col_t first_col,
                                    lxw_row_t last_row, lxw_col_t last_col);
@@ -121,7 +163,44 @@ cdef extern from "xlsxwriter.h":
                                     lxw_row_t last_row, lxw_col_t last_col, const char *string,
                                     lxw_format *format);
 
+    # TODO: Undocumented on C API. Possibly use worksheet_write_url function
+    lxw_error worksheet_write_url_opt(lxw_worksheet *worksheet, lxw_row_t row_num, lxw_col_t col_num,
+                                      const char *url, lxw_format *format, const char *string,
+                                      const char *tooltip);
+    lxw_error worksheet_write_array_formula_num(lxw_worksheet *worksheet, lxw_row_t first_row, lxw_col_t first_col,
+                                                lxw_row_t last_row, lxw_col_t last_col, const char *formula,
+                                                lxw_format *format, double result);
+    lxw_error worksheet_write_blank(lxw_worksheet *worksheet, lxw_row_t row, lxw_col_t col, lxw_format *format);
+    lxw_error worksheet_write_boolean(lxw_worksheet *worksheet, lxw_row_t row, lxw_col_t col,
+                                      int value, lxw_format *format);
+    lxw_error worksheet_write_formula_num(lxw_worksheet *worksheet, lxw_row_t row, lxw_col_t col,
+                                          const char *formula, lxw_format *format, double result);
+    lxw_error worksheet_write_datetime(lxw_worksheet *worksheet, lxw_row_t row, lxw_col_t col,
+                                       lxw_datetime *datetime, lxw_format *format);
+    lxw_error worksheet_write_number(lxw_worksheet *worksheet, lxw_row_t row, lxw_col_t col,
+                                     double number, lxw_format *format);
+    lxw_error worksheet_write_string(lxw_worksheet *worksheet, lxw_row_t row, lxw_col_t col,
+                                     const char *string, lxw_format *format);
+
+    void worksheet_set_selection(lxw_worksheet *worksheet, lxw_row_t first_row, lxw_col_t first_col,
+                                 lxw_row_t last_row, lxw_col_t last_col);
+    void worksheet_set_tab_color(lxw_worksheet *worksheet, lxw_color_t color);
+    void worksheet_set_zoom(lxw_worksheet *worksheet, uint16_t scale);
+    # TODO: Undocumented on C API. Possibly use simple version
+    void worksheet_split_panes_opt(lxw_worksheet *worksheet, double vertical, double horizontal,
+                                   lxw_row_t top_row, lxw_col_t left_col);
+
+    lxw_error worksheet_write_array_formula(lxw_worksheet *worksheet, lxw_row_t first_row, lxw_col_t first_col,
+                                            lxw_row_t last_row, lxw_col_t last_col, const char *formula,
+                                            lxw_format *format);
+
+
+
     void lxw_worksheet_free(lxw_worksheet* worksheet);
+
+    # TODO: How to export define?
+    cdef double LXW_DEF_COL_WIDTH = 8.43
+    cdef double LXW_DEF_ROW_HEIGHT = 15.0
 
 cdef class WorkSheet:
     cdef lxw_worksheet* this_ptr;
@@ -132,6 +211,7 @@ cdef class WorkSheet:
     cdef lxw_format* _c_format(self, Format cell_format);
     cdef void _set_ptr(self, lxw_worksheet* ptr);
     cdef void _add_sheet(self, WorkBook wb);
+    cdef uint32_t* _get_c_array(self, py_list);
 
     cpdef void activate(self);
     cpdef void autofilter(self, int first_row, int first_col, int last_row, int last_col);
@@ -140,16 +220,50 @@ cdef class WorkSheet:
     cpdef void center_vertically(self);
 
     cpdef void fit_to_pages(self, int width, int height);
-    cpdef void freeze_panes(self, int row, int col, int top_row=*, int left_col=*, int pane_type=*);
+
+    # No type for top_row, left_col because it can be None
+    cpdef void freeze_panes(self, int row, int col, top_row=*, left_col=*, int pane_type=*);
+    cpdef void split_panes(self, float x, float y, top_row=*, left_col=*);
+
     cpdef void hide_gridlines(self, int option=*);
     cpdef void hide(self);
     cpdef void hide_zero(self);
     cpdef void print_across(self);
     cpdef void print_area(self, int first_row, int first_col, int last_row, int last_col);
     cpdef void print_row_col_headers(self);
+    cpdef void right_to_left(self);
+    cpdef void select(self);
+    cpdef void set_default_row(self, float height=*, bint hide_unused_rows=*);
+    cpdef void set_landscape(self);
+    cpdef void set_portrait(self);
+    cpdef void set_page_view(self);
+    cpdef void set_first_sheet(self);
+    cpdef void set_paper(self, int paper_size);
+    cpdef void set_print_scale(self, int scale);
+    cpdef void set_start_page(self, int start_page);
+    cpdef void set_zoom(self, int zoom=*);
+    cpdef void set_tab_color(self, color);
+
+    cpdef void set_h_pagebreaks(self, breaks);
+    cpdef void set_v_pagebreaks(self, breaks);
+
+    cpdef void set_margins(self, float left=*, float right=*, float top=*, float bottom=*);
+
+    # No type for margin because it can be None
+    cpdef void set_footer(self, footer=*, dict options=*, margin=*);
+    cpdef void set_header(self, header=*, dict options=*, margin=*);
+
+    # No type for width/height because it can be None
+    # TODO: first_col, last_col, but api has no underscore
+    cpdef void set_column(self, int firstcol, int lastcol, width=*, Format cell_format=*, dict options=*);
+    cpdef void set_row(self, int row, height=*, Format cell_format=*, dict options=*);
 
     cdef void _check_protection_options(self, dict opts);
     cpdef void protect(self, password=*, dict options=*);
+
+    # No type for last_col, because it can be None
+    cpdef void repeat_columns(self, int first_col, last_col=*);
+    cpdef void repeat_rows(self, int first_row, last_row=*);
 
     cpdef void insert_chart(self, int row, int col, Chart chart, dict options=*);
     cpdef void insert_image(self, int row, int col, filename, dict options=*);
@@ -157,6 +271,16 @@ cdef class WorkSheet:
     # TODO: Return void?
     cpdef void merge_range(self, int first_row, int first_col, int last_row, int last_col, data, Format cell_format=*);
 
-    cpdef void write_number(self, lxw_row_t row, lxw_col_t col, double data, Format cell_format=*);
-    cpdef void write_string(self, lxw_row_t row, lxw_col_t col, data, Format cell_format=*);
+    cpdef void set_selection(self, int first_row, int first_col, int last_row, int last_col);
+
+    # Python API actually returns error codes
+    cpdef void write_url(self, int row, int col, url, Format cell_format=*, string=*, tip=*);
+    cpdef void write_array_formula(self, int first_row, int first_col, int last_row, int last_col, formula,
+                                   Format cell_format=*, float value=*);
+    cpdef void write_blank(self, int row, int col, blank, Format cell_format=*);
+    cpdef void write_boolean(self, int row, int col, bint boolean, Format cell_format=*);
+    cpdef void write_formula(self, int row, int col, formula, Format cell_format=*, float value=*);
+    cpdef void write_datetime(self, int row, int col, dtm date, Format cell_format=*);
+    cpdef void write_number(self, int row, int col, float data, Format cell_format=*);
+    cpdef void write_string(self, int row, int col, data, Format cell_format=*);
     cpdef void write(self, int row, int col, data, Format cell_format);

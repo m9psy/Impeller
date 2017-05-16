@@ -14,6 +14,7 @@ from impeller.exceptions import *
 from impeller.c_chart cimport *
 from impeller.c_worksheet cimport *
 
+# TODO: What about TZ?
 cdef lxw_datetime* convert_datetime(dtm value):
     """
     Converts Python datetime to lxw_datetime struct
@@ -156,6 +157,7 @@ cdef int pystring_to_color(color_string):
         return available_colors[color_string]
     else:
         # string as HTML #RRGGBB
+        # TODO: validate against re.match('#[0-9a-fA-F]{6}' ...)
         return int(color_string[1:], base=16)
 
 

@@ -36,7 +36,7 @@ class ImpellerCError(AbstractImpellerError):
     def __str__(self, *args, **kwargs):
         parent_str = super(ImpellerCError, self).__str__(*args, **kwargs)
         parent_str += "Message: " + self.message
-        parent_str += "LXW CODE: " + str(self.lxw_code)
+        parent_str += " LXW CODE: " + str(self.lxw_code)
         return parent_str
 
 
