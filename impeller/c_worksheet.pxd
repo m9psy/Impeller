@@ -202,6 +202,8 @@ cdef extern from "xlsxwriter.h":
     cdef double LXW_DEF_COL_WIDTH = 8.43
     cdef double LXW_DEF_ROW_HEIGHT = 15.0
 
+
+
 cdef class WorkSheet:
     cdef lxw_worksheet* this_ptr;
     cdef const char* c_name
@@ -214,7 +216,7 @@ cdef class WorkSheet:
     cdef uint32_t* _get_c_array(self, py_list);
 
     cpdef void activate(self);
-    cpdef void autofilter(self, int first_row, int first_col, int last_row, int last_col);
+    # def autofilter(self, int first_row, int first_col, int last_row, int last_col);
 
     cpdef void center_horizontally(self);
     cpdef void center_vertically(self);
@@ -222,14 +224,14 @@ cdef class WorkSheet:
     cpdef void fit_to_pages(self, int width, int height);
 
     # No type for top_row, left_col because it can be None
-    cpdef void freeze_panes(self, int row, int col, top_row=*, left_col=*, int pane_type=*);
-    cpdef void split_panes(self, float x, float y, top_row=*, left_col=*);
+    # def freeze_panes(self, int row, int col, top_row=*, left_col=*, int pane_type=*);
+    # def split_panes(self, float x, float y, top_row=*, left_col=*);
 
     cpdef void hide_gridlines(self, int option=*);
     cpdef void hide(self);
     cpdef void hide_zero(self);
     cpdef void print_across(self);
-    cpdef void print_area(self, int first_row, int first_col, int last_row, int last_col);
+    # def print_area(self, int first_row, int first_col, int last_row, int last_col);
     cpdef void print_row_col_headers(self);
     cpdef void right_to_left(self);
     cpdef void select(self);
@@ -250,37 +252,58 @@ cdef class WorkSheet:
     cpdef void set_margins(self, float left=*, float right=*, float top=*, float bottom=*);
 
     # No type for margin because it can be None
+    # TODO: Inspect C API some more, cause result may change
     cpdef void set_footer(self, footer=*, dict options=*, margin=*);
     cpdef void set_header(self, header=*, dict options=*, margin=*);
 
-    # No type for width/height because it can be None
+    # No type for width/height because it can be None. firstcol may be string - see working with ranges
     # TODO: first_col, last_col, but api has no underscore
-    cpdef void set_column(self, int firstcol, int lastcol, width=*, Format cell_format=*, dict options=*);
+    # def set_column(self, firstcol, lastcol, width=*, Format cell_format=*, dict options=*);
     cpdef void set_row(self, int row, height=*, Format cell_format=*, dict options=*);
 
     cdef void _check_protection_options(self, dict opts);
     cpdef void protect(self, password=*, dict options=*);
 
-    # No type for last_col, because it can be None
-    cpdef void repeat_columns(self, int first_col, last_col=*);
+    # No type for last_col, because it can be None. first_col can be a range string "A:E"
+    # def method type, because it is decorated with helper to resolve range strings
+    # def void repeat_columns(self, first_col, last_col=*);
     cpdef void repeat_rows(self, int first_row, last_row=*);
 
-    cpdef void insert_chart(self, int row, int col, Chart chart, dict options=*);
-    cpdef void insert_image(self, int row, int col, filename, dict options=*);
+    # def insert_chart(self, int row, int col, Chart chart, dict options=*);
+    # def insert_image(self, int row, int col, filename, dict options=*);
 
-    # TODO: Return void?
-    cpdef void merge_range(self, int first_row, int first_col, int last_row, int last_col, data, Format cell_format=*);
+    # def  merge_range(self, int first_row, int first_col, int last_row, int last_col, data, Format cell_format=*);
 
-    cpdef void set_selection(self, int first_row, int first_col, int last_row, int last_col);
+    # def set_selection(self, int first_row, int first_col, int last_row, int last_col);
 
+    # TODO: Optimization Decrease calling overhead, declaring methods as cpdef
+    # convert_cell_args decorator must be somewhat rewritten in this case
     # Python API actually returns error codes
-    cpdef void write_url(self, int row, int col, url, Format cell_format=*, string=*, tip=*);
-    cpdef void write_array_formula(self, int first_row, int first_col, int last_row, int last_col, formula,
-                                   Format cell_format=*, float value=*);
-    cpdef void write_blank(self, int row, int col, blank, Format cell_format=*);
-    cpdef void write_boolean(self, int row, int col, bint boolean, Format cell_format=*);
-    cpdef void write_formula(self, int row, int col, formula, Format cell_format=*, float value=*);
-    cpdef void write_datetime(self, int row, int col, dtm date, Format cell_format=*);
-    cpdef void write_number(self, int row, int col, float data, Format cell_format=*);
-    cpdef void write_string(self, int row, int col, data, Format cell_format=*);
+
+    # def write_url(self, int row, int col, url, Format cell_format=*, string=*, tip=*);
+    # def write_array_formula(self, int first_row, int first_col, int last_row, int last_col, formula,
+    #                                Format cell_format=*, float value=*);
+    # def write_blank(self, int row, int col, blank, Format cell_format=*);
+    # def write_boolean(self, int row, int col, bint boolean, Format cell_format=*);
+    # def write_formula(self, int row, int col, formula, Format cell_format=*, float value=*);
+    # def write_datetime(self, int row, int col, dtm date, Format cell_format=*);
+    # def write_number(self, int row, int col, float data, Format cell_format=*);
+    # def write_string(self, int row, int col, data, Format cell_format=*);
     cpdef void write(self, int row, int col, data, Format cell_format);
+
+
+    # Missing in C API
+    # TODO: write_rich_string, write_comment
+    # TODO: show_comments, show_comments_author
+    # TODO: write_row, write_column
+    # TODO: insert_textbox
+    # TODO: add_sparkline -> HUGE
+    # TODO: insert_button
+    # TODO: data_validation -> HUGE
+    # TODO: conditional_format -> HUGE
+    # TODO: add_table -> HUGE method
+    # TODO: outline_settings
+    # TODO: set_vba_name
+
+    # TODO: get_name
+    # TODO: filter_column, filter_column_list <- addition to autofilter

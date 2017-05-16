@@ -10,6 +10,151 @@ from cython.view cimport array as cvarray
 from .exceptions import ImpellerInvalidParameterError
 
 import warnings
+import re
+
+
+range_parts = re.compile(r'(\$?)([A-Z]{1,3})(\$?)(\d+)')
+
+cpdef xl_cell_to_rowcol(cell_str):
+    """
+    Convert a cell reference in A1 notation to a zero indexed row and column.
+
+    Args:
+       cell_str:  A1 style string.
+
+    Returns:
+        row, col: Zero indexed cell row and column indices.
+
+    """
+    if not cell_str:
+        return 0, 0
+
+    match = range_parts.match(cell_str)
+    col_str = match.group(2)
+    row_str = match.group(4)
+
+    # Convert base26 column string to number.
+    expn = 0
+    col = 0
+    for char in reversed(col_str):
+        col += (ord(char) - ord('A') + 1) * (26 ** expn)
+        expn += 1
+
+    # Convert 1-index to zero-index
+    row = int(row_str) - 1
+    col -= 1
+
+    return row, col
+
+def convert_column_args(method):
+    """
+    Decorator function to convert A1 notation in columns method calls
+    to the default row/col notation.
+
+    """
+    def column_wrapper(self, *args, **kwargs):
+
+        try:
+            # First arg is an int, default to row/col notation.
+            if len(args):
+                int(args[0])
+        except ValueError:
+            # First arg isn't an int, convert to A1 notation.
+            cell_1, cell_2 = [col + '1' for col in args[0].split(':')]
+            _, col_1 = xl_cell_to_rowcol(cell_1)
+            _, col_2 = xl_cell_to_rowcol(cell_2)
+            new_args = [col_1, col_2]
+            new_args.extend(args[1:])
+            args = new_args
+
+        return method(self, *args, **kwargs)
+
+    return column_wrapper
+
+def convert_range_args(method):
+    """
+    Decorator function to convert A1 notation in range method calls
+    to the default row/col notation.
+
+    """
+    def cell_wrapper(self, *args, **kwargs):
+
+        try:
+            # First arg is an int, default to row/col notation.
+            if len(args):
+                int(args[0])
+        except ValueError:
+            # First arg isn't an int, convert to A1 notation.
+            if ':' in args[0]:
+                cell_1, cell_2 = args[0].split(':')
+                row_1, col_1 = xl_cell_to_rowcol(cell_1)
+                row_2, col_2 = xl_cell_to_rowcol(cell_2)
+            else:
+                row_1, col_1 = xl_cell_to_rowcol(args[0])
+                row_2, col_2 = row_1, col_1
+
+            new_args = [row_1, col_1, row_2, col_2]
+            new_args.extend(args[1:])
+            args = new_args
+
+        return method(self, *args, **kwargs)
+
+    return cell_wrapper
+
+def convert_cell_args(method):
+    """
+    Decorator function to convert A1 notation in cell method calls
+    to the default row/col notation.
+
+    """
+    def cell_wrapper(self, *args, **kwargs):
+
+        try:
+            # First arg is an int, default to row/col notation.
+            if len(args):
+                int(args[0])
+        except ValueError:
+            # First arg isn't an int, convert to A1 notation.
+            new_args = list(xl_cell_to_rowcol(args[0]))
+            new_args.extend(args[1:])
+            args = new_args
+
+        return method(self, *args, **kwargs)
+
+    return cell_wrapper
+
+# TODO: User must provide additional arguments as named arguments
+# TODO: Function needs further attention
+# set_column("A:D", 60, cell_format=..., options={...})
+#             col   width  etc
+def convert_column_args2(*args):
+    """
+    Used to be a decorator in Python version
+    """
+    try:
+        # First arg is an int, default to row/col notation.
+        if len(args):
+            int(args[0])
+        return args
+    except ValueError:
+        # First arg isn't an int, convert to A1 notation.
+        cell_1, cell_2 = [col + '1' for col in args[0].split(':')]
+        _, col_1 = xl_cell_to_rowcol(cell_1)
+        _, col_2 = xl_cell_to_rowcol(cell_2)
+        new_args = [col_1, col_2]
+        new_args.extend(args[1:])
+        if new_args[2] is None:
+            # Deleting Nonned last_col
+            # func("A:D", None, width=..., cell_format=...)
+            # OR func2("A:D", None)
+            del new_args[2]
+        if len(new_args) > 3 and new_args[3] is None:
+            # Deleting Nonned width
+            # func("A:E", 60, ...)
+            del new_args[3]
+        args = new_args
+        return args
+
 
 # TODO: Some methods are decorated to access nice looking ranges
 # TODO: Not compatible with Py version - Py ver does not accept name or anything in __init__
@@ -41,7 +186,8 @@ cdef class WorkSheet:
     cpdef void activate(self):
         worksheet_activate(self.this_ptr)
 
-    cpdef void autofilter(self, int first_row, int first_col, int last_row, int last_col):
+    @convert_range_args
+    def autofilter(self, int first_row, int first_col, int last_row, int last_col):
         raise_on_error(worksheet_autofilter(self.this_ptr, first_row, first_col, last_row, last_col))
 
     cpdef void center_horizontally(self):
@@ -53,7 +199,8 @@ cdef class WorkSheet:
     cpdef void fit_to_pages(self, int width, int height):
         worksheet_fit_to_pages(self.this_ptr, width, height)
 
-    cpdef void freeze_panes(self, int row, int col, top_row=None, left_col=None, int pane_type=0):
+    @convert_cell_args
+    def freeze_panes(self, int row, int col, top_row=None, left_col=None, int pane_type=0):
         if top_row is None:
             top_row = row
 
@@ -64,7 +211,8 @@ cdef class WorkSheet:
 
     # TODO: Absolutely no idea what top_row and left_col do. Example may be?
     # TODO: Since C API _opt function is undocumented should call simple if top_row and left_col both is None
-    cpdef void split_panes(self, float x, float y, top_row=None, left_col=None):
+    @convert_cell_args
+    def split_panes(self, float x, float y, top_row=None, left_col=None):
         # In C API defaults is zeros
         if top_row is None:
             top_row = 0
@@ -85,7 +233,8 @@ cdef class WorkSheet:
     cpdef void print_across(self):
         worksheet_print_across(self.this_ptr)
 
-    cpdef void print_area(self, int first_row, int first_col, int last_row, int last_col):
+    @convert_range_args
+    def print_area(self, int first_row, int first_col, int last_row, int last_col):
         raise_on_error(worksheet_print_area(self.this_ptr, first_row, first_col, last_row, last_col))
 
     cpdef void print_row_col_headers(self):
@@ -182,8 +331,8 @@ cdef class WorkSheet:
     cpdef void set_margins(self, float left=0.7, float right=0.7, float top=0.75, float bottom=0.75):
         worksheet_set_margins(self.this_ptr, left, right, top, bottom)
 
-    cpdef void set_column(self, int firstcol, int lastcol, width=None,
-                          Format cell_format=None, dict options={}):
+    @convert_column_args
+    def set_column(self, firstcol, lastcol, width=None, Format cell_format=None, dict options={}):
         cdef lxw_row_col_options opts
         # TODO: Only hidden option is supported
         if 'collapsed' in options or 'level' in options:
@@ -253,8 +402,8 @@ cdef class WorkSheet:
 
         worksheet_protect(self.this_ptr, pystring_to_c(password), &protection)
 
-
-    cpdef void repeat_columns(self, int first_col, last_col=None):
+    @convert_column_args
+    def repeat_columns(self, first_col, last_col=None):
         # TODO: Check for zero too?
         if last_col is None:
             last_col = first_col
@@ -267,7 +416,8 @@ cdef class WorkSheet:
         raise_on_error(worksheet_repeat_rows(self.this_ptr, first_row, last_row))
 
 
-    cpdef void insert_chart(self, int row, int col, Chart chart, dict options={}):
+    @convert_cell_args
+    def insert_chart(self, int row, int col, Chart chart, dict options={}):
         cdef lxw_image_options opts
         # TODO: There is todo in .c file about chart defaults
         x_offset = options.get("x_offset", 0)
@@ -296,7 +446,8 @@ cdef class WorkSheet:
 
         raise_on_error(worksheet_insert_chart_opt(self.this_ptr, row, col, chart.this_ptr, &opts))
 
-    cpdef void insert_image(self, int row, int col, filename, dict options={}):
+    @convert_cell_args
+    def insert_image(self, int row, int col, filename, dict options={}):
         cdef lxw_image_options opts
 
         x_offset = options.get("x_offset", 0)
@@ -330,17 +481,20 @@ cdef class WorkSheet:
         raise_on_error(worksheet_insert_image_opt(self.this_ptr, row, col, pystring_to_c(filename), &opts))
 
 
-    cpdef void merge_range(self, int first_row, int first_col, int last_row, int last_col,
+    @convert_range_args
+    def merge_range(self, int first_row, int first_col, int last_row, int last_col,
                            data, Format cell_format=None):
         raise_on_error(worksheet_merge_range(self.this_ptr, first_row, first_col, last_row, last_col,
                                              b'', self._c_format(cell_format)))
         self.write(first_row, first_col, data, cell_format)
 
-    cpdef void set_selection(self, int first_row, int first_col, int last_row, int last_col):
+    @convert_range_args
+    def set_selection(self, int first_row, int first_col, int last_row, int last_col):
         worksheet_set_selection(self.this_ptr, first_row, first_col, last_row, last_col)
 
     # TODO: C function is huge and needs some attention
-    cpdef void write_url(self, int row, int col, url, Format cell_format=None, string=None, tip=None):
+    @convert_cell_args
+    def write_url(self, int row, int col, url, Format cell_format=None, string=None, tip=None):
         cdef char* c_string
         cdef char* c_tip
         # Allow empty string?
@@ -357,33 +511,39 @@ cdef class WorkSheet:
             c_tip = tip_bytes
         raise_on_error(worksheet_write_url_opt(self.this_ptr, row, col, pystring_to_c(url),
                                                self._c_format(cell_format), c_string, c_tip))
-
-    cpdef void write_array_formula(self, int first_row, int first_col, int last_row, int last_col, formula,
+    @convert_range_args
+    def write_array_formula(self, int first_row, int first_col, int last_row, int last_col, formula,
                                    Format cell_format=None, float value=0):
         raise_on_error(worksheet_write_array_formula_num(self.this_ptr, first_row, first_col,
                                                          last_row, last_col, pystring_to_c(formula),
                                                          self._c_format(cell_format), value))
 
-    cpdef void write_formula(self, int row, int col, formula, Format cell_format=None, float value=0):
+    @convert_cell_args
+    def write_formula(self, int row, int col, formula, Format cell_format=None, float value=0):
         raise_on_error(worksheet_write_formula_num(self.this_ptr, row, col, pystring_to_c(formula),
                                                    self._c_format(cell_format), value))
 
-    cpdef void write_datetime(self, int row, int col, dtm date, Format cell_format=None):
+    @convert_cell_args
+    def write_datetime(self, int row, int col, dtm date, Format cell_format=None):
         raise_on_error(worksheet_write_datetime(self.this_ptr, row, col, convert_datetime(date),
                                                 self._c_format(cell_format)))
 
-    cpdef void write_blank(self, int row, int col, blank, Format cell_format=None):
+    @convert_cell_args
+    def write_blank(self, int row, int col, blank, Format cell_format=None):
         if cell_format is None:
             raise ImpellerInvalidParameterError("Blank cells without format ignored by Excel")
         raise_on_error(worksheet_write_blank(self.this_ptr, row, col, self._c_format(cell_format)))
 
-    cpdef void write_boolean(self, int row, int col, bint boolean, Format cell_format=None):
+    @convert_cell_args
+    def write_boolean(self, int row, int col, bint boolean, Format cell_format=None):
         raise_on_error(worksheet_write_boolean(self.this_ptr, row, col, boolean, self._c_format(cell_format)))
 
-    cpdef void write_number(self, int row, int col, float data, Format cell_format=None):
+    @convert_cell_args
+    def write_number(self, int row, int col, float data, Format cell_format=None):
         raise_on_error(worksheet_write_number(self.this_ptr, row, col, data, self._c_format(cell_format)))
 
-    cpdef void write_string(self, int row, int col, data, Format cell_format=None):
+    @convert_cell_args
+    def write_string(self, int row, int col, data, Format cell_format=None):
         data_bytes = _ustring(data).encode("utf8")
         raise_on_error(worksheet_write_string(self.this_ptr, row, col, data_bytes, self._c_format(cell_format)))
 
