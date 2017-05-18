@@ -13,6 +13,9 @@ cdef class Format:
     def __cinit__(self, dict properties={}, *args, **kwargs):
         pass
 
+    def __init__(self, dict properties={}):
+        pass
+
     cdef void _set_ptr(self, lxw_format* ptr):
         self.this_ptr = ptr
 
