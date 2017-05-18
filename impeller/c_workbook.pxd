@@ -83,8 +83,8 @@ cdef class WorkBook:
 
     cpdef void define_name(self, name, formula);
 
-    cpdef WorkSheet get_worksheet_by_name(self, name);
-    cpdef WorkSheet add_worksheet(self, name);
+    cpdef Worksheet get_worksheet_by_name(self, name);
+    cpdef Worksheet add_worksheet(self, name);
     cpdef Format add_format(self, dict properties=*);
     cpdef Chart add_chart(self, dict options=*);
 

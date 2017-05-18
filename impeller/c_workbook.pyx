@@ -6,7 +6,7 @@ from cpython.datetime cimport datetime as dtm
 
 from impeller.c_workbook cimport workbook_new_opt, lxw_workbook_free, lxw_workbook_options, lxw_workbook, \
                                  lxw_doc_properties, py_chart_options_to_c
-from impeller.c_worksheet cimport WorkSheet
+from impeller.c_worksheet cimport Worksheet
 from impeller.c_common cimport raise_on_error, convert_datetime, free_datetime, _ustring, pystring_to_c
 from .exceptions import ImpellerInvalidParameterError
 
@@ -63,15 +63,15 @@ cdef class WorkBook:
     #     if self.this_ptr is not NULL:
     #         lxw_workbook_free(self.this_ptr)
 
-    cpdef WorkSheet add_worksheet(self, name):
-        ws = WorkSheet(_ustring(name))
+    cpdef Worksheet add_worksheet(self, name):
+        ws = Worksheet(_ustring(name))
         ws._add_sheet(self)
         return ws
 
-    cpdef WorkSheet get_worksheet_by_name(self, name):
+    cpdef Worksheet get_worksheet_by_name(self, name):
         cdef bytes name_bytes = _ustring(name).encode("utf8")
         ws_ptr = workbook_get_worksheet_by_name(self.this_ptr, name_bytes)
-        ws = WorkSheet(_ustring(name))
+        ws = Worksheet(_ustring(name))
         ws._set_ptr(ws_ptr)
         return ws
 

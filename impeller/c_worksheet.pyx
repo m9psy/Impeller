@@ -158,7 +158,7 @@ def convert_column_args2(*args):
 
 # TODO: Some methods are decorated to access nice looking ranges
 # TODO: Not compatible with Py version - Py ver does not accept name or anything in __init__
-cdef class WorkSheet:
+cdef class Worksheet:
     def __cinit__(self, name, *args, **kwargs):
         self.name = name
         name_bytes = pystring_to_c(self.name)

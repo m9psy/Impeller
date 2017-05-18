@@ -204,7 +204,7 @@ cdef extern from "xlsxwriter.h":
 
 
 
-cdef class WorkSheet:
+cdef class Worksheet:
     cdef lxw_worksheet* this_ptr;
     cdef const char* c_name
     cpdef name;
