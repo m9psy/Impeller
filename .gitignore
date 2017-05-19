@@ -5,6 +5,7 @@ __pycache__
 build
 tmp
 tmp_optimized
+compiled
 
 # Added on the build stage uniquely for each platform
 *.pyd
