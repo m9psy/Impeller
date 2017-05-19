@@ -28,7 +28,7 @@ chart = os.path.join(MODULE_PATH, "c_chart.pyx")
 
 extensions = [
     Extension(name="impeller.c_workbook",
-              sources=[workbook, worksheet, common, formatting, chart],
+              sources=[workbook],
               include_dirs=[_THIS_, libxlsx_include, MODULE_PATH],
               library_dirs=[libxlsx_lib],
               libraries=['xlsxwriter'],
