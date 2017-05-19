@@ -12,8 +12,6 @@ Current status: not usable at all, work in progress.
 
 TODO: Move to docs.
 
-TODO: Add instructions to build fast zlib
-
 TODO: Other compilers
 
 TODO: build.bat
@@ -28,7 +26,7 @@ How to build from source:
   cd Impeller\zlib
   mkdir msvc_solution64
   cd msvc_solution64
-  cmake .. -G"Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX="..\..\libs\zlib"
+  cmake .. -G"Visual Studio 14 2015 Win64" -DCMAKE_INSTALL_PREFIX="..\..\libs\zlib" -DFAST_LMATCH=ON
   cmake --build . --config Release --target INSTALL
   ```
   Alternatively it is possible to find precompiled (or use modified one) zlib. By default zlib will be compiled with `__cdecl` convention. For `__stdcall` you can find ready-to-use solutions in contrib/vc folder.
