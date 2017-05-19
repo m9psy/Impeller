@@ -12,6 +12,8 @@ environment:
       PYTHON_ARCH: "64"
 
 install:
+  - git submodule update --init --recursive
+
   - ECHO "Filesystem root:"
   - ps: "ls \"C:/\""
 
