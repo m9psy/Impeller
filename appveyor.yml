@@ -14,8 +14,9 @@ environment:
 install:
   - git submodule update --init --recursive
 
-  - ECHO "Filesystem root:"
-  - ps: "ls \"C:/\""
+  - ECHO "CURDUR:"
+  - ECHO %cd%
+  - dir
 
   - ECHO "Installed SDKs:"
   - ps: "ls \"C:/Program Files/Microsoft SDKs/Windows\""
