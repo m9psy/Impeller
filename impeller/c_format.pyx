@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 
 from impeller.c_format cimport *
 from impeller.c_common cimport pystring_to_c, raise_on_error, pystring_to_color, py_underline_to_c, py_align_to_c

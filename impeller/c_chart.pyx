@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 
 from impeller.c_workbook cimport workbook_add_chart
 

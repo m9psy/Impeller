@@ -1,4 +1,5 @@
-# coding: utf8
+# coding: utf-8
+
 from libc.stdint cimport uint32_t, uint16_t, uint8_t
 from libc.time cimport time_t
 

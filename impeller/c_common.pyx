@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 
 """
 common.h from libxlsxwriter + various utilities

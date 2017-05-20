@@ -1,4 +1,4 @@
-# coding: utf8
+# coding: utf-8
 
 # Python xlsxwriter using plain Exceptions, so this will work
 from impeller.c_common import *
