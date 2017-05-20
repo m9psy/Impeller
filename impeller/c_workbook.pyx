@@ -17,7 +17,7 @@ import warnings
 
 import datetime
 
-cdef class WorkBook:
+cdef class Workbook:
     cdef void _check_options(self, dict options):
         """
         Only "constant_memory", "tmpdir" supported options, say something if user provide other ones
@@ -50,7 +50,7 @@ cdef class WorkBook:
 
     def __init__(self, filename, options={}):
         """
-        Creates WorkBook object (orly?). Only supported options are constant_memory and tmpdir
+        Creates Workbook object (orly?). Only supported options are constant_memory and tmpdir
         :param filename:
         :type filename:
         :param options:

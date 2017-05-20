@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from impeller.workbook import WorkBook
+from impeller.workbook import Workbook
 
 # TEST()
 
@@ -10,10 +10,10 @@ import datetime
 ROWS = 10**5
 COLS = 10
 
-c_wb = WorkBook("Юникод имя_c.xlsx")
-c_wb.set_properties({"author": "Емельянов Дмитрий", "company": "Нету компании"})
+c_wb = Workbook("Юникод имя_c.xlsx")
+c_wb.set_properties({"author": " Ζεύς", "company": "كما"})
 c_wb.set_custom_property("Кастом юникод дата", datetime.datetime.now())
-c_ws = c_wb.add_worksheet("Юникод шит!")
+c_ws = c_wb.add_worksheet("Ünicode shëët!")
 start = time.clock()
 bold_format = c_wb.add_format()
 bold_format.set_bold()

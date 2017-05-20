@@ -2,7 +2,7 @@
 
 from libc.stdint cimport uint32_t, uint16_t, uint8_t, int32_t
 
-from impeller.c_workbook cimport WorkBook
+from impeller.c_workbook cimport Workbook
 from impeller.c_common cimport *
 from impeller.c_format cimport *
 from impeller.c_chart cimport lxw_chart, Chart
@@ -212,7 +212,7 @@ cdef class Worksheet:
 
     cdef lxw_format* _c_format(self, Format cell_format);
     cdef void _set_ptr(self, lxw_worksheet* ptr);
-    cdef void _add_sheet(self, WorkBook wb);
+    cdef void _add_sheet(self, Workbook wb);
     cdef uint32_t* _get_c_array(self, py_list);
 
     cpdef void activate(self);

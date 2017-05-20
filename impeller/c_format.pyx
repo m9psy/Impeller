@@ -2,7 +2,7 @@
 
 from impeller.c_format cimport *
 from impeller.c_common cimport pystring_to_c, raise_on_error, pystring_to_color, py_underline_to_c, py_align_to_c
-from impeller.c_workbook cimport workbook_add_format, WorkBook
+from impeller.c_workbook cimport workbook_add_format, Workbook
 from impeller.exceptions import ImpellerInvalidParameterError
 
 
@@ -19,7 +19,7 @@ cdef class Format:
     cdef void _set_ptr(self, lxw_format* ptr):
         self.this_ptr = ptr
 
-    cdef void _add_format(self, WorkBook wb):
+    cdef void _add_format(self, Workbook wb):
         cdef lxw_format* new_format = workbook_add_format(wb.this_ptr)
         self._set_ptr(new_format)
 

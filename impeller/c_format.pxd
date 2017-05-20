@@ -1,7 +1,7 @@
 # coding: utf-8
 
 from libc.stdint cimport uint32_t, int32_t, uint16_t, int16_t, uint8_t
-from impeller.c_workbook cimport WorkBook
+from impeller.c_workbook cimport Workbook
 
 cdef extern from "xlsxwriter.h":
     ctypedef struct lxw_format:
@@ -132,7 +132,7 @@ cdef class Format:
 
     cdef void _set_ptr(self, lxw_format* ptr);
 
-    cdef void _add_format(self, WorkBook wb);
+    cdef void _add_format(self, Workbook wb);
 
     cpdef void set_font_name(self, font_name);
     cpdef void set_font_size(self, int font_size=*);

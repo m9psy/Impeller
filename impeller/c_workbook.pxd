@@ -76,7 +76,7 @@ cdef extern from "xlsxwriter.h":
     void lxw_workbook_free(lxw_workbook *workbook);
 
 
-cdef class WorkBook:
+cdef class Workbook:
     cdef lxw_workbook *this_ptr;
     cpdef filename;
 

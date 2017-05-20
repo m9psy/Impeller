@@ -167,7 +167,7 @@ cdef class Worksheet:
     cdef void _set_ptr(self, lxw_worksheet* ptr):
         self.this_ptr = ptr
 
-    cdef void _add_sheet(self, WorkBook wb):
+    cdef void _add_sheet(self, Workbook wb):
         cdef lxw_worksheet* ws_ptr = workbook_add_worksheet(wb.this_ptr, self.c_name)
         self._set_ptr(ws_ptr)
 

@@ -1,7 +1,7 @@
 # coding: utf-8
 from libc.stdint cimport uint32_t, uint16_t, uint8_t
 
-from impeller.c_workbook cimport WorkBook
+from impeller.c_workbook cimport Workbook
 
 cdef extern from "xlsxwriter.h":
     ctypedef enum lxw_chart_type:
@@ -83,7 +83,7 @@ cdef class Chart:
 
     cdef void _set_ptr(self, lxw_chart* ptr);
 
-    cdef void _add_chart(self, WorkBook wb, uint8_t chart_type);
+    cdef void _add_chart(self, Workbook wb, uint8_t chart_type);
 
     # Return series object?
     cpdef void add_series(self, dict options=*);
