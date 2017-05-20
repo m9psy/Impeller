@@ -1,4 +1,4 @@
 # Wheel first by purpose, wheels is faster
 wheel
-setup_tools
+setuptools
 cython
