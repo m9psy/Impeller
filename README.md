@@ -21,7 +21,7 @@ TODO: Link to benchmark.py, benchmark.c, comparing Cython, C and modified C vers
 The only difference is speed:
 TODO: Benchmarks here
 
-Current status: not usable at all, work in progress.
+<h2>Current status:</h2> unstable, not usable at all, work in progress.
 
 TODO: Move to docs.
 
