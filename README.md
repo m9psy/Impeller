@@ -4,6 +4,19 @@ Impeller is a rotor used to increase (or decrease in case of turbines) the press
 
 It is also a thin Cython wrapper around modified [fork](https://github.com/m9psy/libxlsxwriter) of [libxlsxwriter](https://github.com/jmcnamara/libxlsxwriter), partially compatible with [Python XlsxWriter](https://github.com/jmcnamara/XlsxWriter).
 
+<table>
+  <tr>
+    <td>
+    Build status
+    </td>
+    <td>
+      <a title="Appveyor build status" href="https://ci.appveyor.com/project/m9psy/impeller">
+        <img src="https://ci.appveyor.com/api/projects/status/7eclq5f5qbxpsqyv?svg=true">
+      </a>
+    </td>
+  </tr>
+</table>
+
 TODO: Link to benchmark.py, benchmark.c, comparing Cython, C and modified C versions
 The only difference is speed:
 TODO: Benchmarks here
@@ -19,7 +32,7 @@ TODO: build.bat
 
 How to build from source:
 
-  Win cmake:
+  ## Win cmake:
 
   1. You will need to build zlib first. The build process is usual, CmakeLists for zlib was not changed. The only difference is different install path:
   ```
