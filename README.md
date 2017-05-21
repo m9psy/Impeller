@@ -6,9 +6,16 @@ It is also a thin Cython wrapper around modified [fork](https://github.com/m9psy
 
 <table>
   <tr>
-    <td>
+    <td rowspan="2">
     Build status
     </td>
+    <td>
+      <a title="Travis CI build status" href="https://travis-ci.org/m9psy/Impeller.svg?branch=master">
+        <img src="https://travis-ci.org/m9psy/Impeller.svg?branch=master">
+      </a>
+    </td>
+  </tr>
+  <tr>
     <td>
       <a title="Appveyor build status" href="https://ci.appveyor.com/project/m9psy/impeller">
         <img src="https://ci.appveyor.com/api/projects/status/7eclq5f5qbxpsqyv?svg=true">
@@ -28,10 +35,12 @@ TODO: Move to docs.
 
 TODO: Other compilers
 
-TODO: build.bat
-
+2.7, 3.5 Python supported.
 
 How to build from source:
+
+Since there are submodules, you will need to clone them too:
+`git clone --recursive https://github.com/m9psy/Impeller`
 
   ## Win cmake:
 
@@ -54,11 +63,26 @@ How to build from source:
   cmake --build . --config Release --target INSTALL
   ```
   On Windows pointing to correct zlib location is somewhat tricky - you will see `Performing Test ZLIB_COMPILES - Success` message if everything is OK.
+  Both commands can be called via `build_c_libs.cmd`
   
-  3. Cython is required for the next step. wheell is required (`pip install wheel`). You will need to build the extension:
+  3. Cython is required for the next step. wheel is required - (`pip install -r dev_requirements.txt`). You will need to build the extension:
   ```
   cd Impeller
   python setup.py build_ext bdist_wheel
   ```
-  As a result there will be .whl file in the dist directory
+  As a result there will be .whl file in the dist directory - you can install it with `pip install <wheel_name>.whl` command.
+  
+## Linux:
+  1. zlib is required. Use your favorite package manager like `sudo apt-get install zlib1g-dev`.
+  2. build-essential is requried.
+  3. checkinstall is required.
+  ```
+  cd libxlsxwriter
+  make
+  sudo checkinstall make install
+  cd ..
+  python setup.py build_ext bdist_wheel
+  ```
+  As a result there will be .whl file in the dist directory - you can install it with `pip install <wheel_name>.whl` command.
+  
   
