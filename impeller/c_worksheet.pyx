@@ -8,8 +8,11 @@ from impeller.c_format cimport *
 from cython.view cimport array as cvarray
 
 from .exceptions import ImpellerInvalidParameterError
+from .compatibility import num_types, str_types
 
 import warnings
+import datetime
+import math
 import re
 
 
@@ -159,10 +162,17 @@ def convert_column_args2(*args):
 # TODO: Some methods are decorated to access nice looking ranges
 # TODO: Not compatible with Py version - Py ver does not accept name or anything in __init__
 cdef class Worksheet:
+    cdef void _init_defaults(self):
+        self.strings_to_numbers = False
+        self.strings_to_urls = True
+        self.nan_inf_to_errors = False
+        self.strings_to_formulas = True
+
     def __cinit__(self, name, *args, **kwargs):
         self.name = name
         name_bytes = pystring_to_c(self.name)
         self.c_name = name_bytes
+        self._init_defaults()
 
     cdef void _set_ptr(self, lxw_worksheet* ptr):
         self.this_ptr = ptr
@@ -494,7 +504,7 @@ cdef class Worksheet:
 
     # TODO: C function is huge and needs some attention
     @convert_cell_args
-    def write_url(self, int row, int col, url, Format cell_format=None, string=None, tip=None):
+    def write_url(self, row, col, url, Format cell_format=None, string=None, tip=None):
         cdef char* c_string
         cdef char* c_tip
         # Allow empty string?
@@ -511,42 +521,154 @@ cdef class Worksheet:
             c_tip = tip_bytes
         raise_on_error(worksheet_write_url_opt(self.this_ptr, row, col, pystring_to_c(url),
                                                self._c_format(cell_format), c_string, c_tip))
-    @convert_range_args
-    def write_array_formula(self, int first_row, int first_col, int last_row, int last_col, formula,
+
+    cpdef void write_array_formula_strict(self, int first_row, int first_col, int last_row, int last_col, formula,
                                    Format cell_format=None, float value=0):
         raise_on_error(worksheet_write_array_formula_num(self.this_ptr, first_row, first_col,
                                                          last_row, last_col, pystring_to_c(formula),
                                                          self._c_format(cell_format), value))
 
-    @convert_cell_args
-    def write_formula(self, int row, int col, formula, Format cell_format=None, float value=0):
+    # TODO: Consider seriously to remove convert_args decorator. Critical
+    # It seems not very Pythonic, mess things up, slow down, mess type hints
+
+    @convert_range_args
+    def write_array_formula(self, first_row, first_col, last_row, last_col, formula,
+                                   Format cell_format=None, float value=0):
+        raise_on_error(worksheet_write_array_formula_num(self.this_ptr, first_row, first_col,
+                                                         last_row, last_col, pystring_to_c(formula),
+                                                         self._c_format(cell_format), value))
+
+    cpdef void write_formula_strict(self, int row, int col, formula, Format cell_format=None, float value=0):
         raise_on_error(worksheet_write_formula_num(self.this_ptr, row, col, pystring_to_c(formula),
                                                    self._c_format(cell_format), value))
 
     @convert_cell_args
-    def write_datetime(self, int row, int col, dtm date, Format cell_format=None):
+    def write_formula(self, row, col, formula, Format cell_format=None, float value=0):
+        raise_on_error(worksheet_write_formula_num(self.this_ptr, row, col, pystring_to_c(formula),
+                                                   self._c_format(cell_format), value))
+
+    cpdef void write_datetime_strict(self, int row, int col, dtm date, Format cell_format=None):
         raise_on_error(worksheet_write_datetime(self.this_ptr, row, col, convert_datetime(date),
                                                 self._c_format(cell_format)))
 
     @convert_cell_args
-    def write_blank(self, int row, int col, blank, Format cell_format=None):
+    def write_datetime(self, row, col, dtm date, Format cell_format=None):
+        raise_on_error(worksheet_write_datetime(self.this_ptr, row, col, convert_datetime(date),
+                                                self._c_format(cell_format)))
+
+    cpdef void write_blank_strict(self, int row, int col, blank, Format cell_format=None):
         if cell_format is None:
             raise ImpellerInvalidParameterError("Blank cells without format ignored by Excel")
         raise_on_error(worksheet_write_blank(self.this_ptr, row, col, self._c_format(cell_format)))
 
     @convert_cell_args
-    def write_boolean(self, int row, int col, bint boolean, Format cell_format=None):
+    def write_blank(self, row, col, blank, Format cell_format=None):
+        if cell_format is None:
+            raise ImpellerInvalidParameterError("Blank cells without format ignored by Excel")
+        raise_on_error(worksheet_write_blank(self.this_ptr, row, col, self._c_format(cell_format)))
+
+    cpdef void write_boolean_strict(self, int row, int col, bint boolean, Format cell_format=None):
         raise_on_error(worksheet_write_boolean(self.this_ptr, row, col, boolean, self._c_format(cell_format)))
 
     @convert_cell_args
-    def write_number(self, int row, int col, float data, Format cell_format=None):
+    def write_boolean(self, row, col, boolean, Format cell_format=None):
+        raise_on_error(worksheet_write_boolean(self.this_ptr, row, col, boolean, self._c_format(cell_format)))
+
+    cpdef void write_number_strict(self, int row, int col, float data, Format cell_format=None):
         raise_on_error(worksheet_write_number(self.this_ptr, row, col, data, self._c_format(cell_format)))
 
     @convert_cell_args
-    def write_string(self, int row, int col, data, Format cell_format=None):
+    def write_number(self, row, col, data, Format cell_format=None):
+        self.write_number_strict(row, col, data, cell_format)
+
+    cpdef void write_string_strict(self, int row, int col, data, Format cell_format=None):
         data_bytes = _ustring(data).encode("utf8")
         raise_on_error(worksheet_write_string(self.this_ptr, row, col, data_bytes, self._c_format(cell_format)))
 
-    # TODO: Non typed writing
-    cpdef void write(self, int row, int col, data, Format cell_format):
-        pass
+    @convert_cell_args
+    def write_string(self, row, col, data, Format cell_format=None):
+        data_bytes = _ustring(data).encode("utf8")
+        raise_on_error(worksheet_write_string(self.this_ptr, row, col, data_bytes, self._c_format(cell_format)))
+
+    @convert_cell_args
+    def write(self, row, col, *args):
+        # Check the number of args passed.
+        if not len(args):
+            raise TypeError("write() takes at least 4 arguments (3 given)")
+
+        # The first arg should be the token for all write calls.
+        token = args[0]
+        try:
+            fmt = args[1]
+        except IndexError:
+            fmt = None
+
+        # Write string types.
+        if isinstance(token, str_types):
+            # Map the data to the appropriate write_*() method.
+            if token == '':
+                return self.write_blank_strict(row, col, None, fmt)
+
+            elif self.strings_to_formulas and token.startswith('='):
+                # TODO: Missed value
+                return self.write_formula_strict(row, col, token, fmt)
+
+            elif self.strings_to_urls and re.match('(ftp|http)s?://', token):
+                # TODO: Missing strict version
+                return self.write_url(row, col, *args)
+
+            elif self.strings_to_urls and re.match('mailto:', token):
+                return self.write_url(row, col, *args)
+
+            elif self.strings_to_urls and re.match('(in|ex)ternal:', token):
+                return self.write_url(row, col, *args)
+
+            # TODO: Dropped self._isnan, self._isinf - dropped 2.5 and Jython support
+            elif self.strings_to_numbers:
+                try:
+                    f = float(token)
+                    if (self.nan_inf_to_errors or
+                            (not math.isnan(f) and not math.isinf(f))):
+                        return self.write_number_strict(row, col, f, fmt)
+                except ValueError:
+                    # Not a number, write as a string.
+                    pass
+
+                return self.write_string_strict(row, col, token, fmt)
+
+            else:
+                # We have a plain string.
+                return self.write_string_strict(row, col, token, fmt)
+
+        # Write number types.
+        if isinstance(token, num_types):
+            return self.write_number_strict(row, col, token, fmt)
+
+        # Write None as a blank cell.
+        if token is None:
+            return self.write_blank_strict(row, col, None, fmt)
+
+        # Write boolean types.
+        if isinstance(token, bool):
+            return self.write_boolean_strict(row, col, token, fmt)
+
+        # TODO: Dropped support of time, timedelta, date
+        # Write datetime objects.
+        if isinstance(token, datetime.datetime):
+            return self.write_datetime_strict(row, col, token, fmt)
+
+        # We haven't matched a supported type. Try float.
+        try:
+            f = float(token)
+            return self.write_number_strict(row, col, f, fmt)
+        except ValueError:
+            pass
+        except TypeError:
+            raise TypeError("Unsupported type %s in write()" % type(token))
+
+        # Finally try string.
+        try:
+            str(token)
+            return self.write_string_strict(row, col, token, fmt)
+        except ValueError:
+            raise TypeError("Unsupported type %s in write()" % type(token))

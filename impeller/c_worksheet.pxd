@@ -208,6 +208,12 @@ cdef class Worksheet:
     cdef lxw_worksheet* this_ptr;
     cdef const char* c_name
     cpdef name;
+    cpdef bint strings_to_numbers
+    cpdef bint strings_to_urls
+    cpdef bint nan_inf_to_errors
+    cpdef bint strings_to_formulas
+
+    cdef void _init_defaults(self);
 
 
     cdef lxw_format* _c_format(self, Format cell_format);
@@ -281,15 +287,15 @@ cdef class Worksheet:
     # Python API actually returns error codes
 
     # def write_url(self, int row, int col, url, Format cell_format=*, string=*, tip=*);
-    # def write_array_formula(self, int first_row, int first_col, int last_row, int last_col, formula,
-    #                                Format cell_format=*, float value=*);
-    # def write_blank(self, int row, int col, blank, Format cell_format=*);
-    # def write_boolean(self, int row, int col, bint boolean, Format cell_format=*);
-    # def write_formula(self, int row, int col, formula, Format cell_format=*, float value=*);
-    # def write_datetime(self, int row, int col, dtm date, Format cell_format=*);
-    # def write_number(self, int row, int col, float data, Format cell_format=*);
-    # def write_string(self, int row, int col, data, Format cell_format=*);
-    cpdef void write(self, int row, int col, data, Format cell_format);
+    cpdef void write_array_formula_strict(self, int first_row, int first_col, int last_row, int last_col, formula,
+                                   Format cell_format=*, float value=*);
+    cpdef void write_blank_strict(self, int row, int col, blank, Format cell_format=*);
+    cpdef void write_boolean_strict(self, int row, int col, bint boolean, Format cell_format=*);
+    cpdef void write_formula_strict(self, int row, int col, formula, Format cell_format=*, float value=*);
+    cpdef void write_datetime_strict(self, int row, int col, dtm date, Format cell_format=*);
+    cpdef void write_number_strict(self, int row, int col, float data, Format cell_format=*);
+    cpdef void write_string_strict(self, int row, int col, data, Format cell_format=*);
+    # cpdef void write(self, int row, int col, data, Format cell_format);
 
 
     # Missing in C API
