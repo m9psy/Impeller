@@ -34,7 +34,7 @@ before_install:
 install:
   - echo "Python version is"
   - python -V
-  - pip install -r dev_requirements.txt
+  - sudo pip install -r dev_requirements.txt
   - python setup.py build_ext bdist_wheel
 
 script:
