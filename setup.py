@@ -35,6 +35,13 @@ def move_binaries():
         warnings.warn("Some sufficient binaries are missing, try to build them with build_c_libs.cmd")
 
 
+def merge_dicts(*dicts):
+    result = {}
+    for dct in dicts:
+        result.update(dct)
+    return result
+
+
 language_level = sys.version_info[0]
 _THIS_ = os.path.dirname(os.path.realpath(__file__))
 
@@ -82,7 +89,7 @@ extensions_sources = [{"name": "impeller.c_workbook", "sources": workbook},
                       {"name": "impeller.c_common", "sources": common},
                       {"name": "impeller.c_chart", "sources": chart}]
 
-extensions = [Extension(**extensions_args, **source) for source in extensions_sources]
+extensions = [Extension(**merge_dicts(extensions_args, source)) for source in extensions_sources]
 
 setup(
     name="Impeller",

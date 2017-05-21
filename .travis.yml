@@ -26,6 +26,8 @@ install:
   - make
   - sudo checkinstall -y make install
   - cd ..
+  - echo "Python version is"
+  - python -V
   - python setup.py build_ext bdist_wheel
 
 script:
