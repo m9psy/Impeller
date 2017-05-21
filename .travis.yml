@@ -8,7 +8,7 @@ branches:
     - master
 
 env:
-  - OS_PACKAGES="build-essentials zlib1g-dev gcc checkinstall"
+  - OS_PACKAGES="build-essential zlib1g-dev gcc checkinstall"
 
 compiler:
   - gcc
