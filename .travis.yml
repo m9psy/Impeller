@@ -19,8 +19,10 @@ python:
 install:
   - sudo pip install -r dev_requirements.txt
   - sudo apt-get install -y $OS_PACKAGES
-  - make -f libxlsxwriter/Makefile
-  - sudo checkinstall make -f libxlsxwriter/Makefile install
+  - cd libxlsxwriter
+  - make
+  - checkinstall make install
+  - cd ..
   - python setup.py build_ext bdist_wheel
 
 script:
