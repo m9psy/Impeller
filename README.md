@@ -24,9 +24,90 @@ It is also a thin Cython wrapper around modified [fork](https://github.com/m9psy
   </tr>
 </table>
 
-TODO: Link to benchmark.py, benchmark.c, comparing Cython, C and modified C versions
-The only difference is speed:
-TODO: Benchmarks here
+Since the only reason to create this package is _speed obsession_, here are some crude results (work in progress and current problem is API compatibility). Results was received by running `misc/simple_bench.py` on Windows machine. Benchmark saving 10000 * 10 cells with extensive styling (every even row styled).
+
+<table>
+<head>
+  <tr>
+    <th>Lib name</th>
+    <th title="Close time - time to create archive">Timing in seconds</th>
+    <th>Times slower than Impeller</th>
+  </tr>
+</head>
+<tbody>
+<tr>
+  <td>Impeller</td>
+  <td>Close time: 0.29 Total: 0.43</td>
+  <td>1x</td>
+</tr>
+<tr>
+  <td>Python XlsxWriter</td>
+  <td>Close time: 1.32 Total: 2.00</td>
+  <td>4.7x</td>
+</tr>
+<tr>
+  <td>xlwt</td>
+  <td>Close time: 0.34 Total: 1.30</td>
+  <td>3.0x</td>
+</tr>
+<tr>
+  <td>pyexcelerate</td>
+  <td>Close time: 1.88 Total: 2.17</td>
+  <td>5.0x</td>
+</tr>
+<tr>
+  <td>openpyxl</td>
+  <td>Close time: 2.21 Total: 7.56</td>
+  <td>17.6x</td>
+</tr>
+</tbody>
+</table>
+
+Some comments: `xlwt` produces `.xls` files, not `.xlsx` and unable to handle more than 65536 cells (`.xls` format limitation and xlwt is not participating in second competition). `openpyxl` can actually not only write, but read and edit files (the only one who builds the elements tree, I suppose). openpyxl however was tested in `write_only` mode. XlsxWriter and Impeller are sharing the same API.
+
+It is possible to run Impeller faster: instead of all-in-one `write` method you can use type-stricted methods like:
+`write_number_strict`
+`write_string_strict`
+`write_blank_strict`
+etc.
+This methods are much faster, than simple `write` (so you can dump an array faster), but requires correct third parameter type. Also you can not use Excel notation to provide row and col ("A2", "E15" not working) in fast methods - you can convert this notation to indexes via `xl_cell_to_rowcol` function.
+
+Another table for 100000 * 10 cells:
+
+<table>
+<head>
+  <tr>
+    <th>Lib name</th>
+    <th title="Close time - time to create archive">Timing in seconds</th>
+    <th>Times slower than Impeller</th>
+  </tr>
+</head>
+<tbody>
+<tr>
+  <td>Impeller</td>
+  <td>Close time: 3.23 Total: 4.69</td>
+  <td>1x</td>
+</tr>
+<tr>
+  <td>Python XlsxWriter</td>
+  <td>Close time: 10.61 Total: 18.17</td>
+  <td>3.9x</td>
+</tr>
+<tr>
+  <td>pyexcelerate</td>
+  <td>Close time: 17.48 Total: 20.74</td>
+  <td>4.4x</td>
+</tr>
+<tr>
+  <td>openpyxl</td>
+  <td>Close time: 21.22 Total: 69.00</td>
+  <td>14.7x</td>
+</tr>
+</tbody>
+</table>
+
+
+TODO: benchmark.c, comparing Cython, C and modified C versions
 
 ## Current status:
   Unstable, not usable at all, work in progress.
