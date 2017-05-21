@@ -1,6 +1,5 @@
 language: c
 
-sudo: false
 notifications:
   email: false
 
