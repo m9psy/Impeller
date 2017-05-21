@@ -10,22 +10,28 @@ branches:
   only:
     - master
 
-env:
-  - OS_PACKAGES="build-essential zlib1g-dev gcc checkinstall"
-
 compiler:
   - gcc
 
 python:
-  - 3.5
+  - "2.7"
+  - "3.5"
 
-install:
-  - sudo pip install -r dev_requirements.txt
-  - sudo apt-get install -y $OS_PACKAGES
+addons:
+  apt:
+    packages:
+      - build-essential
+      - zlib1g-dev
+      - gcc
+      - checkinstall
+
+before_install:
   - cd libxlsxwriter
   - make
   - sudo checkinstall -y make install
   - cd ..
+
+install:
   - echo "Python version is"
   - python -V
   - python setup.py build_ext bdist_wheel
