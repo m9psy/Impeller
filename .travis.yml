@@ -1,4 +1,4 @@
-language: c
+language: python
 
 # Sudo required for checkinstall - install xlsx headers and lib
 sudo: required
