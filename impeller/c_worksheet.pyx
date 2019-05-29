@@ -574,7 +574,7 @@ cdef class Worksheet:
     def write_boolean(self, row, col, boolean, Format cell_format=None):
         raise_on_error(worksheet_write_boolean(self.this_ptr, row, col, boolean, self._c_format(cell_format)))
 
-    cpdef void write_number_strict(self, int row, int col, float data, Format cell_format=None):
+    cpdef void write_number_strict(self, int row, int col, double data, Format cell_format=None):
         raise_on_error(worksheet_write_number(self.this_ptr, row, col, data, self._c_format(cell_format)))
 
     @convert_cell_args

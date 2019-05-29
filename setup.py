@@ -98,7 +98,7 @@ setup(
     author='Dmitriy Emelianov',
     author_email='emelianovds@yandex.ru',
     url="https://github.com/m9psy/Impeller",
-    version='0.1.dev0',
+    version='0.1.dev1',
     packages=['impeller'],
     package_data=package_data,
     ext_modules=cythonize(extensions, compiler_directives={'language_level': language_level}),

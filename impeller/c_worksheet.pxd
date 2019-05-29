@@ -293,7 +293,7 @@ cdef class Worksheet:
     cpdef void write_boolean_strict(self, int row, int col, bint boolean, Format cell_format=*);
     cpdef void write_formula_strict(self, int row, int col, formula, Format cell_format=*, float value=*);
     cpdef void write_datetime_strict(self, int row, int col, dtm date, Format cell_format=*);
-    cpdef void write_number_strict(self, int row, int col, float data, Format cell_format=*);
+    cpdef void write_number_strict(self, int row, int col, double data, Format cell_format=*);
     cpdef void write_string_strict(self, int row, int col, data, Format cell_format=*);
     # cpdef void write(self, int row, int col, data, Format cell_format);
 
